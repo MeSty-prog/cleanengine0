@@ -8,7 +8,8 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 app.permanent_session_lifetime = timedelta(days=30)
 
-DATA_FILE = "data.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "data.json")
 
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
