@@ -8,9 +8,11 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 app.permanent_session_lifetime = timedelta(days=30)
 
+# 🔥 KRİTİK DÜZELTME (PATH SORUNU ÇÖZÜLDÜ)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data.json")
 
+# Eğer dosya yoksa oluştur
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({"users": {}}, f)
@@ -28,10 +30,6 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f)
 
-
-# ========================
-# GLOBAL STYLE
-# ========================
 
 STYLE = """
 <style>
@@ -96,9 +94,6 @@ a{
 </style>
 """
 
-# ========================
-# REGISTER
-# ========================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     data = load_data()
@@ -122,8 +117,7 @@ def register():
             save_data(data)
             return redirect("/login")
 
-    return f"""
-    {STYLE}
+    return f"""{STYLE}
     <div class="card">
         <h2>Kayıt Ol</h2>
         <form method="POST">
@@ -134,13 +128,9 @@ def register():
         </form>
         <p>{message}</p>
         <p><a href="/login">Giriş Yap</a></p>
-    </div>
-    """
+    </div>"""
 
 
-# ========================
-# LOGIN
-# ========================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     data = load_data()
@@ -157,8 +147,7 @@ def login():
         else:
             message = "Hatalı giriş!"
 
-    return f"""
-    {STYLE}
+    return f"""{STYLE}
     <div class="card">
         <h2>Giriş Yap</h2>
         <form method="POST">
@@ -168,24 +157,21 @@ def login():
         </form>
         <p>{message}</p>
         <p><a href="/register">Kayıt Ol</a></p>
-    </div>
-    """
+    </div>"""
 
 
-# ========================
-# HOME
-# ========================
 @app.route("/", methods=["GET", "POST"])
 def home():
     if "user" not in session:
         return redirect("/login")
 
     data = load_data()
-    if session["user"] not in data["users"]:
+    user = data["users"].get(session["user"])
+
+    if not user:
         session.pop("user", None)
         return redirect("/login")
 
-    user = data["users"][session["user"]]
     money = int((user["total"] / 20) * user["pack_price"])
     message = ""
 
@@ -202,21 +188,19 @@ def home():
 
         save_data(data)
 
-        messages = [
+        message = random.choice([
             "Kontrol sende.",
             "Azaltmaya devam!",
             "Ciğerlerin teşekkür ediyor.",
             "Her gün bir adım."
-        ]
-        message = random.choice(messages)
-        money = int((user["total"] / 20) * user["pack_price"])
+        ])
 
-    history_html = ""
-    for entry in reversed(user["history"]):
-        history_html += f"<p>{entry['date']} → {entry['smokes']} sigara</p>"
+    history_html = "".join(
+        f"<p>{e['date']} → {e['smokes']} sigara</p>"
+        for e in reversed(user["history"])
+    )
 
-    return f"""
-    {STYLE}
+    return f"""{STYLE}
     <div class="card">
         <div class="logout">
             <a href="/logout">Çıkış Yap</a>
@@ -240,8 +224,7 @@ def home():
             <h4>Geçmiş</h4>
             {history_html}
         </div>
-    </div>
-    """
+    </div>"""
 
 
 @app.route("/logout")
@@ -251,4 +234,5 @@ def logout():
 
 
 if __name__ == "__main__":
+    app.run(debug=True)
     app.run(host="0.0.0.0", port=5000, debug=True)
