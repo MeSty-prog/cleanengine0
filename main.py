@@ -8,11 +8,11 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 app.permanent_session_lifetime = timedelta(days=30)
 
-# 🔥 KRİTİK DÜZELTME (PATH SORUNU ÇÖZÜLDÜ)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data.json")
 
-# Eğer dosya yoksa oluştur
+
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({"users": {}}, f)
